@@ -1,0 +1,63 @@
+# ─────────────────────────────────────────────
+# VenueFlow AI — .gitignore
+# ─────────────────────────────────────────────
+
+# ──── Secrets & Credentials ────
+.env
+.env.*
+!.env.example
+*.env
+env.yaml
+
+# Firebase service account keys (ALL patterns)
+*service-account*.json
+*serviceAccount*.json
+*firebase-adminsdk*.json
+*credentials*.json
+venueflow-ai-*.json
+google-services.json
+
+# ──── Python ────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+htmlcov/
+.coverage
+venv/
+.venv/
+env/
+
+# ──── Flutter / Dart ────
+mobile/build/
+mobile/.dart_tool/
+mobile/.packages
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+*.apk
+*.aab
+*.ipa
+
+# ──── IDE ────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ──── OS ────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ──── Logs ────
+*.log

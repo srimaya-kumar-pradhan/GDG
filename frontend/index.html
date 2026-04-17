@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VenueFlow AI — Real-time venue intelligence for large-scale sporting events. Eliminate queuing, navigate smartly, and enjoy the game.">
+    <title>VenueFlow AI — Venue Intelligence</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- ═══════════════════════════════════════ -->
+    <!-- EMERGENCY BANNER (hidden by default)    -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="emergency-banner" class="emergency-banner hidden" role="alert" aria-live="assertive">
+        <div class="emergency-content">
+            <span class="emergency-icon">⚠️</span>
+            <span id="emergency-message">Emergency alert active</span>
+            <button id="emergency-dismiss" class="emergency-dismiss" aria-label="Dismiss alert">✕</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- HEADER                                  -->
+    <!-- ═══════════════════════════════════════ -->
+    <header class="header" id="main-header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="14" stroke="url(#logo-grad)" stroke-width="2.5"/>
+                        <path d="M10 20 L16 10 L22 20" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="16" cy="14" r="2" fill="url(#logo-grad)"/>
+                        <defs>
+                            <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32">
+                                <stop offset="0%" stop-color="#6366f1"/>
+                                <stop offset="100%" stop-color="#06b6d4"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">VenueFlow<span class="logo-ai">AI</span></span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="game-ticker" id="game-ticker">
+                <div class="team home">
+                    <span class="team-name" id="home-team">Panthers</span>
+                    <span class="team-score" id="home-score">14</span>
+                </div>
+                <div class="game-status">
+                    <span class="quarter" id="game-quarter">Q2</span>
+                    <span class="time" id="game-time">4:00</span>
+                </div>
+                <div class="team away">
+                    <span class="team-score" id="away-score">10</span>
+                    <span class="team-name" id="away-team">Falcons</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-badge" id="connection-status">
+                <span class="status-dot live"></span>
+                <span>Live</span>
+            </div>
+            <button class="icon-btn" id="admin-toggle" aria-label="Toggle admin panel" title="Admin Panel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- MAIN LAYOUT                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <main class="main-layout">
+        <!-- LEFT: Stadium Visualization -->
+        <section class="stadium-panel" id="stadium-panel" aria-label="Stadium map and visualization">
+            <div class="panel-header">
+                <h2>Stadium Overview</h2>
+                <div class="density-legend">
+                    <span class="legend-item"><span class="legend-dot low"></span>Low</span>
+                    <span class="legend-item"><span class="legend-dot med"></span>Medium</span>
+                    <span class="legend-item"><span class="legend-dot high"></span>High</span>
+                </div>
+            </div>
+            <div class="stadium-map-container">
+                <canvas id="stadium-canvas" width="600" height="500" aria-label="Interactive stadium map showing sections and crowd density"></canvas>
+                <div class="map-overlay" id="map-tooltip" style="display:none;">
+                    <span id="tooltip-text"></span>
+                </div>
+            </div>
+            <div class="stadium-stats">
+                <div class="stat-card" id="stat-overall-density">
+                    <span class="stat-label">Overall Density</span>
+                    <span class="stat-value" id="stat-density-value">78%</span>
+                    <div class="stat-bar"><div class="stat-bar-fill" id="stat-density-bar" style="width:78%"></div></div>
+                </div>
+                <div class="stat-card" id="stat-active-users">
+                    <span class="stat-label">Active Users</span>
+                    <span class="stat-value" id="stat-users-value">39,000</span>
+                </div>
+                <div class="stat-card" id="stat-avg-wait">
+                    <span class="stat-label">Avg Wait Time</span>
+                    <span class="stat-value" id="stat-wait-value">6 min</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Intelligence Panel -->
+        <section class="intelligence-panel" id="intelligence-panel" aria-label="AI recommendations and controls">
+            <!-- User Location Selector -->
+            <div class="control-card" id="user-controls">
+                <h3>Your Location</h3>
+                <div class="location-selector">
+                    <label for="section-select">Section</label>
+                    <select id="section-select">
+                        <option value="201">Section 201</option>
+                        <option value="202" selected>Section 202</option>
+                        <option value="203">Section 203</option>
+                        <option value="204">Section 204</option>
+                        <option value="205">Section 205</option>
+                        <option value="206">Section 206</option>
+                        <option value="207">Section 207</option>
+                        <option value="208">Section 208</option>
+                        <option value="209">Section 209</option>
+                        <option value="210">Section 210</option>
+                    </select>
+                </div>
+                <div class="accessibility-toggle">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="accessibility-mobility" />
+                        <span class="checkbox-custom"></span>
+                        <span>Mobility accessibility</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Intent Buttons -->
+            <div class="intent-grid" id="intent-grid">
+                <button class="intent-btn" data-intent="restroom" id="btn-restroom">
+                    <span class="intent-icon">🚻</span>
+                    <span class="intent-label">Restroom</span>
+                </button>
+                <button class="intent-btn" data-intent="food" id="btn-food">
+                    <span class="intent-icon">🍔</span>
+                    <span class="intent-label">Food</span>
+                </button>
+                <button class="intent-btn" data-intent="exit" id="btn-exit">
+                    <span class="intent-icon">🚪</span>
+                    <span class="intent-label">Exit</span>
+                </button>
+                <button class="intent-btn" data-intent="seat" id="btn-seat">
+                    <span class="intent-icon">💺</span>
+                    <span class="intent-label">My Seat</span>
+                </button>
+            </div>
+
+            <!-- Recommendation Display -->
+            <div class="recommendation-card hidden" id="recommendation-card">
+                <div class="rec-header">
+                    <div class="rec-type-badge" id="rec-type-badge">RESTROOM</div>
+                    <div class="rec-confidence" id="rec-confidence">
+                        <span class="confidence-label">Confidence</span>
+                        <span class="confidence-value" id="confidence-value">95%</span>
+                    </div>
+                </div>
+                <p class="rec-text" id="rec-text"></p>
+                <div class="rec-details">
+                    <div class="rec-detail" id="rec-eta">
+                        <span class="detail-icon">⏱️</span>
+                        <span class="detail-label">ETA</span>
+                        <span class="detail-value" id="eta-value">--</span>
+                    </div>
+                    <div class="rec-detail" id="rec-wait">
+                        <span class="detail-icon">⏳</span>
+                        <span class="detail-label">Wait</span>
+                        <span class="detail-value" id="wait-value">--</span>
+                    </div>
+                    <div class="rec-detail" id="rec-accessible">
+                        <span class="detail-icon">♿</span>
+                        <span class="detail-label">Accessible</span>
+                        <span class="detail-value" id="accessible-value">--</span>
+                    </div>
+                </div>
+                <div class="rec-game-context" id="rec-game-context">
+                    <span class="context-icon">🏈</span>
+                    <span id="game-context-text"></span>
+                </div>
+
+                <!-- Alternatives -->
+                <div class="alternatives-section hidden" id="alternatives-section">
+                    <h4>Alternatives</h4>
+                    <div class="alternatives-list" id="alternatives-list"></div>
+                </div>
+
+                <!-- Route Waypoints -->
+                <div class="route-section" id="route-section">
+                    <h4>Route</h4>
+                    <div class="route-steps" id="route-steps"></div>
+                </div>
+            </div>
+
+            <!-- Latency Indicator -->
+            <div class="latency-display" id="latency-display">
+                <span class="latency-dot"></span>
+                <span>Response: <strong id="latency-value">--</strong>ms</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- ADMIN PANEL (Slide-out)                 -->
+    <!-- ═══════════════════════════════════════ -->
+    <aside class="admin-panel hidden" id="admin-panel" aria-label="Admin controls">
+        <div class="admin-header">
+            <h2>Admin Controls</h2>
+            <button class="icon-btn" id="admin-close" aria-label="Close admin panel">✕</button>
+        </div>
+        <div class="admin-body">
+            <!-- Demo Controls -->
+            <div class="admin-section">
+                <h3>Demo Scenario</h3>
+                <button class="admin-btn primary" id="btn-reset-demo">🔄 Reset Demo</button>
+                <button class="admin-btn danger" id="btn-trigger-emergency">🚨 Trigger Emergency</button>
+                <button class="admin-btn" id="btn-clear-emergency">✅ Clear Emergency</button>
+            </div>
+
+            <!-- Game State Controls -->
+            <div class="admin-section">
+                <h3>Game State</h3>
+                <div class="admin-field">
+                    <label for="admin-quarter">Quarter</label>
+                    <select id="admin-quarter">
+                        <option value="1">Q1</option>
+                        <option value="2" selected>Q2</option>
+                        <option value="3">Q3</option>
+                        <option value="4">Q4</option>
+                    </select>
+                </div>
+                <div class="admin-field">
+                    <label for="admin-minutes">Minutes Remaining</label>
+                    <input type="number" id="admin-minutes" value="4" min="0" max="15" step="0.5">
+                </div>
+                <div class="admin-field">
+                    <label for="admin-momentum">Momentum</label>
+                    <select id="admin-momentum">
+                        <option value="normal">Normal</option>
+                        <option value="halftime_approaching" selected>Halftime Approaching</option>
+                        <option value="critical_play">Critical Play</option>
+                        <option value="timeout">Timeout</option>
+                    </select>
+                </div>
+                <button class="admin-btn" id="btn-update-game">Update Game State</button>
+            </div>
+
+            <!-- Wait Time Override -->
+            <div class="admin-section">
+                <h3>Wait Times</h3>
+                <div class="admin-field">
+                    <label for="admin-facility">Facility</label>
+                    <select id="admin-facility">
+                        <option value="restroom-202">Section 202 Restroom</option>
+                        <option value="restroom-205">Section 205 Restroom</option>
+                        <option value="restroom-201">Section 201 Restroom</option>
+                        <option value="food-bbq-201">Smokey's BBQ</option>
+                        <option value="food-pizza-204">Stadium Slice</option>
+                    </select>
+                </div>
+                <div class="admin-field">
+                    <label for="admin-wait-time">Wait (minutes)</label>
+                    <input type="number" id="admin-wait-time" value="15" min="0" max="30">
+                </div>
+                <button class="admin-btn" id="btn-update-wait">Update Wait Time</button>
+            </div>
+
+            <!-- Analytics -->
+            <div class="admin-section">
+                <h3>Analytics</h3>
+                <div id="analytics-display" class="analytics-display">
+                    <p>No data yet. Make some recommendations first.</p>
+                </div>
+                <button class="admin-btn" id="btn-refresh-analytics">📊 Refresh Analytics</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- NOTIFICATION TOAST                      -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

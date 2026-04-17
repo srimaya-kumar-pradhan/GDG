@@ -1,0 +1,24 @@
+name: venueflow_mobile
+description: VenueFlow AI — Smart venue navigation for Indian sporting events (IPL/ISL/PKL)
+publish_to: 'none'
+version: 2.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.1
+  http: ^1.1.0
+  shimmer: ^3.0.0
+  google_fonts: ^6.1.0
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true

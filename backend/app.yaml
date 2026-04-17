@@ -1,0 +1,11 @@
+runtime: python311
+
+env: standard
+
+entrypoint: uvicorn app:app --host 0.0.0.0 --port $PORT
+
+env_variables:
+  GOOGLE_CLOUD_PROJECT: "venueflow-ai"
+
+includes:
+  - env.yaml  # Contains secrets (not in repo)
