@@ -13,6 +13,7 @@ from typing import Optional
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 import os
+import hmac
 import logging
 from dotenv import load_dotenv
 
@@ -31,13 +32,28 @@ from integrations import (
 
 
 # ─────────────────────────────────────────────
-# App Lifecycle (Firebase + Gemini init on startup)
+# Environment, Security & Lifecycle
 # ─────────────────────────────────────────────
+
+APP_ENV = os.getenv("APP_ENV", "development")
+ADMIN_KEY = os.getenv("ADMIN_KEY", "demo-admin-key")
+
+
+def _verify_admin_key(provided_key: str) -> bool:
+    """Timing-safe admin key verification (OWASP A01 mitigation)."""
+    return hmac.compare_digest(provided_key.encode(), ADMIN_KEY.encode())
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize external services on startup."""
     logger.info("═══ VenueFlow AI Starting ═══")
+    logger.info(f"Environment: {APP_ENV}")
+
+    # SECURITY: Block production deployment with default admin key
+    if APP_ENV == "production" and ADMIN_KEY in ("demo-admin-key", "demo-admin-key-2026", "change-this-to-a-secure-key"):
+        logger.critical("FATAL: Default ADMIN_KEY detected in production. Set a secure key via ADMIN_KEY env var.")
+        raise RuntimeError("FATAL: Default ADMIN_KEY detected in production. Set a secure ADMIN_KEY.")
 
     # Initialize Firebase (non-blocking — works without it)
     fb_ok = init_firebase()
@@ -59,10 +75,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS (allow frontend + Flutter dev)
+# CORS — environment-gated (OWASP A05 mitigation)
+_cors_origins = ["*"] if APP_ENV == "development" else [
+    "https://venueflow-ai-backend.onrender.com",
+    "https://venueflow-backend.onrender.com",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -154,11 +174,12 @@ async def health():
         "status": "healthy",
         "service": "VenueFlow AI",
         "version": "2.0.0",
+        "environment": APP_ENV,
         "integrations": {
             "firebase": is_firebase_available(),
             "gemini": is_gemini_available(),
         },
-        "sport_modes": list(["ipl", "odi", "isl", "pkl"]),
+        "sport_modes": ["ipl", "odi", "isl", "pkl"],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -279,9 +300,9 @@ async def get_venue_status():
 async def update_venue_status(update: VenueStatusUpdate, request: Request):
     """Admin endpoint: Update facility wait time or crowd density."""
     admin_key = request.headers.get("X-Admin-Key", "")
-    expected = os.getenv("ADMIN_KEY", "demo-admin-key")
 
-    if admin_key != expected:
+    if not _verify_admin_key(admin_key):
+        logger.warning(f"Failed admin auth attempt on /venue-status from {request.client.host}")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     if update.wait_time_minutes is not None:
@@ -306,9 +327,9 @@ async def update_venue_status(update: VenueStatusUpdate, request: Request):
 async def update_game_state(update: MatchStateUpdate, request: Request):
     """Admin endpoint: Update match/game state (supports IPL + legacy)."""
     admin_key = request.headers.get("X-Admin-Key", "")
-    expected = os.getenv("ADMIN_KEY", "demo-admin-key")
 
-    if admin_key != expected:
+    if not _verify_admin_key(admin_key):
+        logger.warning(f"Failed admin auth attempt on /game-state from {request.client.host}")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     gs = venue_state.game_state
@@ -363,9 +384,9 @@ async def update_game_state(update: MatchStateUpdate, request: Request):
 async def trigger_emergency(req: EmergencyRequest, request: Request):
     """Emergency endpoint: Broadcast evacuation protocol + Firebase push."""
     admin_key = request.headers.get("X-Admin-Key", "")
-    expected = os.getenv("ADMIN_KEY", "demo-admin-key")
 
-    if admin_key != expected:
+    if not _verify_admin_key(admin_key):
+        logger.warning(f"Failed admin auth attempt on /emergency from {request.client.host}")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     alert = venue_state.trigger_emergency(req.message, req.exit_routes)
@@ -381,9 +402,9 @@ async def trigger_emergency(req: EmergencyRequest, request: Request):
 async def clear_emergency(request: Request):
     """Clear emergency alerts."""
     admin_key = request.headers.get("X-Admin-Key", "")
-    expected = os.getenv("ADMIN_KEY", "demo-admin-key")
 
-    if admin_key != expected:
+    if not _verify_admin_key(admin_key):
+        logger.warning(f"Failed admin auth attempt on /emergency/clear from {request.client.host}")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     venue_state.clear_emergency()

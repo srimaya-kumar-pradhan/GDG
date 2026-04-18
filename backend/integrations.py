@@ -14,6 +14,7 @@ SECURITY:
 
 import os
 import json
+import asyncio
 import tempfile
 import logging
 from typing import Optional
@@ -225,7 +226,7 @@ TASK: Write a 1-2 sentence helpful, warm, culturally appropriate recommendation 
 Be conversational like a friendly IPL stadium guide. Include a cricket/sport metaphor if appropriate.
 Keep it SHORT — max 2 sentences. No emojis. No markdown."""
 
-        response = _gemini_model.generate_content(prompt)
+        response = await asyncio.to_thread(_gemini_model.generate_content, prompt)
 
         if response and response.text:
             text = response.text.strip()
