@@ -12,10 +12,18 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
+from functools import lru_cache
 import os
 import hmac
 import logging
 from dotenv import load_dotenv
+
+# Rate Limiting (OWASP A04 mitigation)
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
 
 # Load .env BEFORE any imports that need env vars
 load_dotenv()
@@ -91,6 +99,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Wire rate limiter to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("venueflow")
@@ -172,7 +184,8 @@ async def root():
 
 
 @app.get("/health")
-async def health():
+@limiter.limit("60/minute")
+async def health(request: Request):
     """Health check with integration status."""
     return {
         "status": "healthy",
@@ -189,7 +202,8 @@ async def health():
 
 
 @app.post("/api/v1/recommendations")
-async def get_venue_recommendation(req: RecommendationRequest):
+@limiter.limit("30/minute")
+async def get_venue_recommendation(req: RecommendationRequest, request: Request):
     """
     Main endpoint: IPL-aware intelligent recommendation.
     Pipeline: Rule Engine → (optional) Gemini Enhancement → Firebase Sync
