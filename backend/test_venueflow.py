@@ -486,5 +486,171 @@ class TestAPIEndpoints(unittest.TestCase):
         self.client.post('/api/v1/demo/reset')
 
 
+# ── Additional tests added for coverage expansion ────────────────────
+
+class TestStatusEndpoint(unittest.TestCase):
+    """Tests for the /status system endpoint."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fastapi.testclient import TestClient
+        from app import app
+        cls.client = TestClient(app)
+
+    def test_status_returns_200(self):
+        """Status endpoint must return HTTP 200."""
+        response = self.client.get("/status")
+        self.assertEqual(response.status_code, 200)
+
+    def test_status_has_version(self):
+        """Status must include version field."""
+        data = self.client.get("/status").json()
+        self.assertIn("version", data)
+
+    def test_status_has_features(self):
+        """Status must expose feature flags."""
+        data = self.client.get("/status").json()
+        self.assertIn("features", data)
+        self.assertIn("gemini_ai", data["features"])
+
+    def test_status_has_sports(self):
+        """Status must list supported sports."""
+        data = self.client.get("/status").json()
+        self.assertIn("sports_supported", data)
+        self.assertIn("IPL", data["sports_supported"])
+
+    def test_status_has_languages(self):
+        """Status must list supported languages."""
+        data = self.client.get("/status").json()
+        self.assertIn("languages_supported", data)
+        self.assertGreaterEqual(len(data["languages_supported"]), 5)
+
+
+class TestOpenAPISchema(unittest.TestCase):
+    """Tests verifying the OpenAPI contract is well-formed."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fastapi.testclient import TestClient
+        from app import app
+        cls.client = TestClient(app)
+
+    def test_openapi_json_exists(self):
+        """OpenAPI schema endpoint must exist."""
+        response = self.client.get("/openapi.json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_openapi_has_all_tags(self):
+        """OpenAPI schema must declare expected tags."""
+        schema = self.client.get("/openapi.json").json()
+        tag_names = [t["name"] for t in schema.get("tags", [])]
+        for expected in ["System", "Recommendations", "Venue", "Emergency", "Analytics", "Demo"]:
+            self.assertIn(expected, tag_names, f"Missing tag: {expected}")
+
+    def test_openapi_has_contact(self):
+        """OpenAPI schema must include contact information."""
+        schema = self.client.get("/openapi.json").json()
+        self.assertIn("contact", schema.get("info", {}))
+
+    def test_openapi_has_license(self):
+        """OpenAPI schema must include license information."""
+        schema = self.client.get("/openapi.json").json()
+        info = schema.get("info", {})
+        self.assertIn("license", info)
+
+    def test_openapi_version_matches(self):
+        """OpenAPI version should match health endpoint version."""
+        schema = self.client.get("/openapi.json").json()
+        self.assertEqual(schema["info"]["version"], "2.0.0")
+
+
+class TestInputBoundaries(unittest.TestCase):
+    """Edge case and boundary tests for input validation."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fastapi.testclient import TestClient
+        from app import app
+        cls.client = TestClient(app)
+
+    def test_recommendation_missing_body_returns_422(self):
+        """POST to recommendations with no body must return 422."""
+        response = self.client.post("/api/v1/recommendations", json={})
+        self.assertEqual(response.status_code, 422)
+
+    def test_recommendation_invalid_intent_returns_422(self):
+        """POST with invalid intent value must fail validation."""
+        response = self.client.post("/api/v1/recommendations", json={
+            "user_id": "test",
+            "location": {"latitude": 20.0, "longitude": 85.0},
+            "intent": "INVALID_INTENT_XYZ",
+            "accessibility_needs": [],
+            "seat_section": 101
+        })
+        # Either 422 (Pydantic rejected) or 400 (app rejected) — not 500
+        self.assertIn(response.status_code, [400, 422])
+
+    def test_health_method_not_allowed(self):
+        """POST to /health must return 405 Method Not Allowed."""
+        response = self.client.post("/health")
+        self.assertEqual(response.status_code, 405)
+
+    def test_invalid_latitude_rejected(self):
+        """Location with latitude > 90 must be rejected."""
+        response = self.client.post("/api/v1/recommendations", json={
+            "user_id": "test",
+            "location": {"latitude": 999.0, "longitude": 85.0},
+            "intent": "restroom",
+        })
+        self.assertEqual(response.status_code, 422)
+
+    def test_invalid_longitude_rejected(self):
+        """Location with longitude < -180 must be rejected."""
+        response = self.client.post("/api/v1/recommendations", json={
+            "user_id": "test",
+            "location": {"latitude": 20.0, "longitude": -999.0},
+            "intent": "restroom",
+        })
+        self.assertEqual(response.status_code, 422)
+
+
+class TestSecurityHeaders(unittest.TestCase):
+    """Tests verifying security posture."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fastapi.testclient import TestClient
+        from app import app
+        cls.client = TestClient(app)
+
+    def test_admin_endpoint_rejects_no_key(self):
+        """Admin endpoint must reject requests without admin key."""
+        response = self.client.post("/api/v1/venue-status", json={
+            "facility_id": "test",
+            "wait_time_minutes": 5,
+            "crowd_density": 0.5
+        })
+        # Must not be 200 — should be 401 or 403
+        self.assertIn(response.status_code, [401, 403])
+
+    def test_game_state_rejects_no_key(self):
+        """Game state update must reject requests without admin key."""
+        response = self.client.post("/api/v1/game-state", json={
+            "quarter": 3,
+            "minutes_remaining": 10.0,
+        })
+        self.assertEqual(response.status_code, 401)
+
+    def test_emergency_clear_rejects_no_key(self):
+        """Emergency clear must reject requests without admin key."""
+        response = self.client.post("/api/v1/emergency/clear")
+        self.assertEqual(response.status_code, 401)
+
+    def test_demo_reset_accessible_without_auth(self):
+        """Demo reset must be publicly accessible."""
+        response = self.client.post("/api/v1/demo/reset")
+        self.assertIn(response.status_code, [200, 201])
+
+
 if __name__ == '__main__':
     unittest.main()
