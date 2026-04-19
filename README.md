@@ -4,6 +4,136 @@
 
 VenueFlow AI is a real-time venue intelligence system that predicts crowd patterns, routes users optimally, and coordinates logistics across 50,000+ concurrent users — running on 100% free-tier infrastructure.
 
+> **Live Demo:**
+> - 🌐 Frontend: [venueflow-ai-493608.web.app](https://venueflow-ai-493608.web.app)
+> - 🔗 Backend: [venueflow-ai-backend.onrender.com](https://venueflow-ai-backend.onrender.com/health)
+
+---
+
+## 🧭 Our Chosen Vertical
+
+This project is built under the **Smart Venue & Event Management** vertical, addressing real-world challenges faced by spectators at large-scale Indian sporting events — specifically **IPL (cricket), ISL (football), and PKL (kabaddi)**.
+
+Indian stadiums regularly host 30,000–130,000 spectators per match. The fan experience is plagued by:
+
+- **Long, unpredictable queues** at restrooms and food counters (10–20 min waits during breaks)
+- **No real-time guidance** — fans rely on guesswork to find the nearest restroom, exit, or food stall
+- **Chaotic evacuations** — no personalized, accessible routing during emergencies
+- **Missed game moments** — fans leave their seats at the worst possible time (right before a super over, death overs, or a penalty)
+
+VenueFlow AI solves this by providing **real-time, context-aware, AI-powered navigation and recommendations** — helping fans spend less time in queues and more time watching the game.
+
+---
+
+## 🧠 Approach and Logic
+
+### Problem Statement
+
+At any large venue event, the core fan frustration is: *"Where should I go right now, and is it worth leaving my seat?"* There is no system that combines **live facility status, game timing, crowd density, and accessibility** into a single, actionable recommendation.
+
+### Why This Approach
+
+We chose a **rule-based decision engine with optional AI enhancement** over a purely ML-driven approach:
+
+| Decision | Reasoning |
+|----------|-----------|
+| **Rule-based primary engine** | Deterministic, sub-3ms latency, no API dependency, fully testable |
+| **Gemini API as optional layer** | Enhances recommendations with natural language, not a hard requirement |
+| **Haversine formula for distances** | Accurate geodesic calculation without requiring Google Maps API |
+| **Composite scoring model** | Balances wait time (60%) vs. walk time (40%) — waiting is more frustrating than walking |
+| **Sport-specific timing engines** | IPL strategic timeouts, ISL halftimes, and PKL breaks have radically different crowd patterns |
+
+### Key Design Decisions
+
+- **FastAPI over Flask** — async support, automatic validation via Pydantic, built-in OpenAPI docs
+- **Firebase Realtime Database** — sub-100ms reads for live wait times and crowd density
+- **Static frontend (no framework)** — zero build step, instant load, CDN-friendly for Firebase Hosting
+- **Canvas-based stadium map** — lightweight, interactive visualization without heavy mapping libraries
+- **Accessibility-first filtering** — all recommendations pass through an accessibility gate before scoring
+
+---
+
+## ⚙️ How the Solution Works
+
+### End-to-End Flow
+
+```
+┌─────────────────┐     HTTPS POST      ┌─────────────────────┐
+│   FRONTEND      │ ──────────────────→  │   FASTAPI BACKEND   │
+│   (Firebase     │                      │   (Render.com)      │
+│    Hosting)     │  ← JSON response ──  │                     │
+└─────────────────┘                      └─────────────────────┘
+                                                  │
+                                         ┌────────┴────────┐
+                                         │                 │
+                                   ┌─────▼─────┐   ┌──────▼──────┐
+                                   │  Decision  │   │  Firebase   │
+                                   │  Engine    │   │  Realtime   │
+                                   │  (Rules)   │   │  Database   │
+                                   └────────────┘   └─────────────┘
+```
+
+### Step-by-Step Breakdown
+
+**1. User Interaction (Frontend)**
+- User opens the web dashboard and sees a live stadium map with crowd density heatmap
+- Selects their current section (e.g., Section 202) and taps an intent button: 🚻 Restroom, 🍔 Food, 🚪 Exit, or 💺 My Seat
+- Optionally enables accessibility mode (mobility filtering)
+
+**2. Request to Backend**
+- Frontend sends a `POST /api/v1/recommendations` request with:
+  - User's GPS coordinates (derived from section)
+  - Selected intent (`restroom`, `food`, `exit`, `seat`)
+  - Accessibility needs (`["mobility"]` or `[]`)
+  - Current seat section number
+
+**3. Processing Logic (Decision Engine)**
+- **Facility filtering** — retrieves all facilities matching the intent (e.g., all restrooms)
+- **Accessibility gate** — removes non-accessible facilities if mobility mode is enabled
+- **Distance calculation** — computes Haversine distance from user to each facility
+- **Walk time estimation** — converts distance to walk time (1.2 m/s + 20% indoor overhead)
+- **Composite scoring** — ranks facilities: `Score = (wait_time × 0.6) + (walk_time × 0.4)`
+- **Game timing analysis** — checks match phase (powerplay, death overs, halftime) to add context
+- **Alternative generation** — returns top 3 alternatives alongside the primary recommendation
+
+**4. Response to Frontend**
+- Backend returns a structured JSON response (avg. latency: **2.7ms**) containing:
+  - Primary recommendation with destination, ETA, wait time, and confidence score
+  - Route waypoints for the stadium map overlay
+  - Game-aware context message (e.g., *"Halftime in ~4 min — beat the rush now"*)
+  - Alternatives list for user choice
+- Frontend renders the recommendation card, highlights the destination on the stadium map, and draws the route
+
+---
+
+## ⚠️ Assumptions Made
+
+### System Constraints
+- The system operates on **free-tier infrastructure** (Render.com + Firebase Hosting) with no paid API keys required
+- Backend cold-start latency on Render's free tier is ~30 seconds; subsequent requests are sub-5ms
+- A single Render instance handles all traffic (no horizontal scaling on free tier)
+
+### Data Assumptions
+- Facility wait times are provided via the admin panel or simulated data; **no IoT sensor integration** in the current version
+- Crowd density values are simulated per section (0.0–1.0 scale); production would use camera/sensor feeds
+- Venue layout (sections, facility positions, GPS coordinates) is pre-configured for a 10-section stadium template
+
+### User Behavior Assumptions
+- Users have a **stable internet connection** inside the venue (Wi-Fi or mobile data)
+- Users interact via a modern web browser (Chrome, Safari, Firefox, Edge)
+- User location is approximated by their **selected seat section** rather than live GPS tracking
+- Walking speed is estimated at **1.2 m/s** (conservative indoor pace) with a 20% overhead for navigation
+
+### External Dependencies
+- **Gemini API** is optional — the system functions fully without it (rule-based engine is the primary path)
+- **Firebase Realtime Database** is used for persistent state; the system falls back to in-memory data if unavailable
+- All distance calculations use the **Haversine formula** (no Google Maps API dependency)
+
+### Scope Limitations
+- The current version supports **four Indian sports leagues**: IPL, ODI, ISL, and PKL
+- Multi-language support covers English, Hindi, Tamil, Odia, and Kannada (recommendation text only)
+- The stadium map is a 2D canvas representation, not a 3D or satellite view
+
 ---
 
 ## ✨ Key Features
@@ -15,8 +145,9 @@ VenueFlow AI is a real-time venue intelligence system that predicts crowd patter
 | **🚪 Exit Navigation** | Optimal exit routing with crowd density awareness |
 | **🚨 Emergency Alerts** | Real-time evacuation routing with accessible path filtering |
 | **♿ Accessibility First** | All recommendations filter for ramps, elevators, accessible facilities |
-| **🏈 Game-Aware Timing** | Knows when halftime/timeouts are coming, suggests optimal action windows |
+| **🏏 Sport-Aware Timing** | IPL strategic timeouts, ISL halftimes, PKL breaks — knows when to suggest movement |
 | **📊 Live Stadium Map** | Interactive canvas showing crowd density heatmap per section |
+| **🌐 Multi-Language** | English, Hindi, Tamil, Odia, Kannada support |
 
 ---
 
@@ -24,30 +155,32 @@ VenueFlow AI is a real-time venue intelligence system that predicts crowd patter
 
 ```
 ┌──────────────────────────────────────────────┐
-│           Frontend (HTML/CSS/JS)              │
-│  • Interactive Stadium Canvas                 │
-│  • Recommendation Cards                       │
-│  • Admin Panel + Emergency Controls           │
+│     Frontend — Firebase Hosting              │
+│  (venueflow-ai-493608.web.app)               │
+│  • Interactive Stadium Canvas (HTML5)        │
+│  • Recommendation Cards + Admin Panel        │
+│  • Environment-Aware API Routing             │
 ├──────────────────────────────────────────────┤
-│           FastAPI Backend (Python)             │
-│  • Rule-Based Decision Engine (primary)       │
-│  • Haversine Distance Calculations            │
-│  • Game Timing Intelligence                   │
-│  • Accessibility Filtering                    │
+│     Backend — Render.com (FastAPI/Python)     │
+│  (venueflow-ai-backend.onrender.com)         │
+│  • Rule-Based Decision Engine (primary)      │
+│  • IPL/ISL/PKL Multi-Sport Timing Engine     │
+│  • Haversine Distance Calculations           │
+│  • Accessibility Filtering Pipeline          │
 ├──────────────────────────────────────────────┤
-│           Data Layer (Simulated)              │
-│  • Venue Facilities Directory                 │
-│  • Real-Time Wait Times + Crowd Density       │
-│  • Game State + Emergency Alerts              │
-│  (Production: Firebase Realtime DB)           │
+│     Data Layer                               │
+│  • Venue Facilities Directory (in-memory)    │
+│  • Real-Time Wait Times + Crowd Density      │
+│  • Game State + Emergency Alerts             │
+│  • Firebase Realtime Database (production)   │
 └──────────────────────────────────────────────┘
 ```
 
-**Design Decisions:**
-- Primary decision engine is **rule-based** (no API dependency)
-- Gemini API is an optional enhancement, not a hard requirement
-- **Haversine formula** for all distance calculations (Maps API only for visualization)
-- FastAPI over Flask for async performance and automatic validation
+**Core Design Principles:**
+- Primary decision engine is **rule-based** — deterministic, testable, zero API dependency
+- Gemini API is an **optional enhancement**, not a hard requirement
+- **Haversine formula** for all distance calculations (no Maps API needed)
+- FastAPI for async performance and automatic Pydantic validation
 
 ---
 
@@ -61,8 +194,8 @@ VenueFlow AI is a real-time venue intelligence system that predicts crowd patter
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/venueflow-ai.git
-cd venueflow-ai
+git clone https://github.com/srimaya-kumar-pradhan/GDG.git
+cd GDG
 
 # Install dependencies
 cd backend
@@ -94,7 +227,7 @@ The default demo simulates this exact scenario:
 
 ### How to test:
 
-1. Open http://localhost:8080
+1. Open https://venueflow-ai-493608.web.app
 2. Section 202 is pre-selected
 3. Click **🚻 RESTROOM** → See recommendation for Section 205
 4. Click **🍔 FOOD** → See nearest low-queue concession
@@ -106,18 +239,23 @@ The default demo simulates this exact scenario:
 ## 📁 Project Structure
 
 ```
-venueflow-ai/
+GDG/
 ├── backend/
 │   ├── app.py                 # FastAPI server + endpoints
 │   ├── decision_engine.py     # Rule-based recommendation engine
+│   ├── ipl_engine.py          # IPL/ISL/PKL multi-sport timing engine
 │   ├── venue_data.py          # Simulated venue data store
 │   ├── test_venueflow.py      # 45 unit + integration tests
 │   ├── requirements.txt       # Python dependencies
-│   └── app.yaml               # GCP App Engine config
+│   ├── Dockerfile             # Container config for Cloud Run
+│   └── .python-version        # Python 3.11.9 pinning
 ├── frontend/
 │   ├── index.html             # Dashboard HTML
 │   ├── style.css              # Dark glassmorphism theme
 │   └── app.js                 # Stadium renderer + API client
+├── firebase.json              # Firebase Hosting config
+├── .firebaserc                # Firebase project reference
+├── render.yaml                # Render deployment config
 ├── .gitignore
 └── README.md
 ```
@@ -141,7 +279,7 @@ venueflow-ai/
 ### Example: Get Recommendation
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/recommendations \
+curl -X POST https://venueflow-ai-backend.onrender.com/api/v1/recommendations \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "demo_user",
@@ -165,7 +303,7 @@ curl -X POST http://localhost:8080/api/v1/recommendations \
     "confidence_score": 0.9,
     "accessibility_compliant": true,
     "game_context": "Halftime in ~4 min — beat the rush now",
-    "route_waypoints": [...]
+    "route_waypoints": ["..."]
   },
   "latency_ms": 2.7
 }
@@ -187,13 +325,23 @@ Score = (wait_time × 0.6) + (walk_time × 0.4)
 - Checks game timing for optimal action windows
 - Uses **Haversine formula** for all distance calculations
 
+### Multi-Sport Timing Intelligence
+
+| Sport | Key Windows | Engine Logic |
+|-------|-------------|--------------|
+| **IPL** | Strategic Timeout (2.5 min), Innings Break (20 min), Death Overs | Analyzes overs, innings, star batsman, powerplay phase |
+| **ODI** | Innings Break (40 min), Powerplay, Death Overs | Extended cricket logic for 50-over format |
+| **ISL** | Halftime (15 min), Injury Time | Football-specific half and minute tracking |
+| **PKL** | Halftime (5 min), Super Raids, All Outs | Kabaddi-specific momentum analysis |
+
 ---
 
 ## 🔒 Security
 
 - ✅ Input validation via Pydantic models (lat/lng range checking, intent enum)
 - ✅ Admin endpoints protected with API key (`X-Admin-Key` header)
-- ✅ CORS configured for cross-origin requests
+- ✅ Constant-time key comparison (`hmac.compare_digest`) to prevent timing attacks
+- ✅ Environment-gated CORS — wildcard in development, allowlisted origins in production
 - ✅ No SQL (Firestore/NoSQL immune to injection)
 - ✅ Gemini prompts sandboxed (no shell access)
 - ✅ GDPR-ready (no PII storage, anonymous locations)
@@ -220,20 +368,26 @@ Score = (wait_time × 0.6) + (walk_time × 0.4)
 
 ---
 
-## 🚢 Deployment (GCP Free Tier)
+## 🚢 Deployment
+
+### Current Production Setup
+
+| Component | Platform | URL |
+|-----------|----------|-----|
+| Frontend | Firebase Hosting | [venueflow-ai-493608.web.app](https://venueflow-ai-493608.web.app) |
+| Backend | Render.com | [venueflow-ai-backend.onrender.com](https://venueflow-ai-backend.onrender.com) |
+
+**Total monthly cost: $0** (free tier on both platforms)
+
+### Deploy Frontend
 
 ```bash
-# Set up GCP project
-gcloud projects create venueflow-ai
-gcloud config set project venueflow-ai
-gcloud services enable appengine.googleapis.com
-
-# Deploy
-cd backend
-gcloud app deploy app.yaml
+firebase deploy --only hosting --project venueflow-ai-493608
 ```
 
-**Total monthly cost: $0** (GCP free tier)
+### Deploy Backend
+
+Backend auto-deploys on `git push` to the `main` branch via Render.
 
 ---
 
