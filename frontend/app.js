@@ -7,7 +7,16 @@
 // Configuration
 // ═════════════════════════════════════════════
 
-const API_BASE = window.location.origin;
+// Auto-detect backend URL based on hosting environment
+const API_BASE = (() => {
+    const host = window.location.hostname;
+    // Firebase Hosting → route to Render backend
+    if (host.includes('web.app') || host.includes('firebaseapp.com')) {
+        return 'https://venueflow-ai-backend.onrender.com';
+    }
+    // Local dev or co-located → same origin
+    return window.location.origin;
+})();
 const POLL_INTERVAL = 8000; // ms — venue status refresh
 
 // Section coordinates (for canvas rendering — pixel positions)

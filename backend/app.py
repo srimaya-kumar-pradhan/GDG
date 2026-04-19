@@ -77,6 +77,10 @@ app = FastAPI(
 
 # CORS — environment-gated (OWASP A05 mitigation)
 _cors_origins = ["*"] if APP_ENV == "development" else [
+    # Firebase Hosting (primary frontend)
+    "https://venueflow-ai-493608.web.app",
+    "https://venueflow-ai-493608.firebaseapp.com",
+    # Cloud Run backend (self-reference for /docs)
     "https://venueflow-ai-backend.onrender.com",
     "https://venueflow-backend.onrender.com",
 ]
