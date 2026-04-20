@@ -142,19 +142,19 @@
 
             <!-- Intent Buttons -->
             <div class="intent-grid" id="intent-grid">
-                <button class="intent-btn" data-intent="restroom" id="btn-restroom" aria-label="Get restroom recommendation for current section">
+                <button class="intent-btn" data-intent="restroom" id="btn-restroom">
                     <span class="intent-icon">🚻</span>
                     <span class="intent-label">Restroom</span>
                 </button>
-                <button class="intent-btn" data-intent="food" id="btn-food" aria-label="Get food concession recommendation">
+                <button class="intent-btn" data-intent="food" id="btn-food">
                     <span class="intent-icon">🍔</span>
                     <span class="intent-label">Food</span>
                 </button>
-                <button class="intent-btn" data-intent="exit" id="btn-exit" aria-label="Get nearest exit route">
+                <button class="intent-btn" data-intent="exit" id="btn-exit">
                     <span class="intent-icon">🚪</span>
                     <span class="intent-label">Exit</span>
                 </button>
-                <button class="intent-btn" data-intent="seat" id="btn-seat" aria-label="Navigate back to your seat">
+                <button class="intent-btn" data-intent="seat" id="btn-seat">
                     <span class="intent-icon">💺</span>
                     <span class="intent-label">My Seat</span>
                 </button>
@@ -225,9 +225,9 @@
             <!-- Demo Controls -->
             <div class="admin-section">
                 <h3>Demo Scenario</h3>
-                <button class="admin-btn primary" id="btn-reset-demo" aria-label="Reset demo scenario to default state">🔄 Reset Demo</button>
-                <button class="admin-btn danger" id="btn-trigger-emergency" aria-label="Trigger emergency evacuation alert">🚨 Trigger Emergency</button>
-                <button class="admin-btn" id="btn-clear-emergency" aria-label="Clear active emergency alert">✅ Clear Emergency</button>
+                <button class="admin-btn primary" id="btn-reset-demo">🔄 Reset Demo</button>
+                <button class="admin-btn danger" id="btn-trigger-emergency">🚨 Trigger Emergency</button>
+                <button class="admin-btn" id="btn-clear-emergency">✅ Clear Emergency</button>
             </div>
 
             <!-- Game State Controls -->
@@ -255,7 +255,7 @@
                         <option value="timeout">Timeout</option>
                     </select>
                 </div>
-                <button class="admin-btn" id="btn-update-game" aria-label="Submit game state update">Update Game State</button>
+                <button class="admin-btn" id="btn-update-game">Update Game State</button>
             </div>
 
             <!-- Wait Time Override -->
@@ -275,7 +275,7 @@
                     <label for="admin-wait-time">Wait (minutes)</label>
                     <input type="number" id="admin-wait-time" value="15" min="0" max="30">
                 </div>
-                <button class="admin-btn" id="btn-update-wait" aria-label="Submit wait time update">Update Wait Time</button>
+                <button class="admin-btn" id="btn-update-wait">Update Wait Time</button>
             </div>
 
             <!-- Analytics -->
@@ -284,7 +284,7 @@
                 <div id="analytics-display" class="analytics-display">
                     <p>No data yet. Make some recommendations first.</p>
                 </div>
-                <button class="admin-btn" id="btn-refresh-analytics" aria-label="Refresh analytics data">📊 Refresh Analytics</button>
+                <button class="admin-btn" id="btn-refresh-analytics">📊 Refresh Analytics</button>
             </div>
         </div>
     </aside>
