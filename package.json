@@ -1,0 +1,21 @@
+{
+  "name": "fifa-wc2026-stadium-assistant",
+  "version": "1.0.0",
+  "description": "GenAI-powered fan navigation and crowd management assistant for FIFA World Cup 2026",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "jest --verbose --forceExit"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "keywords": ["fifa", "world-cup-2026", "gemini", "stadium-assistant", "genai"],
+  "license": "MIT"
+}
