@@ -1,0 +1,147 @@
+{
+  "stadiums": {
+    "metlife": {
+      "name": "MetLife Stadium",
+      "city": "East Rutherford, NJ",
+      "capacity": 82500,
+      "coords": { "lat": 40.8128, "lng": -74.0742 },
+      "gates": {
+        "A": { "name": "Gate A - Main Entrance", "coords": { "lat": 40.8135, "lng": -74.0755 }, "status": "open", "crowd_density": 0.7 },
+        "B": { "name": "Gate B - East", "coords": { "lat": 40.8140, "lng": -74.0730 }, "status": "open", "crowd_density": 0.4 },
+        "C": { "name": "Gate C - West", "coords": { "lat": 40.8120, "lng": -74.0760 }, "status": "open", "crowd_density": 0.85 },
+        "D": { "name": "Gate D - South", "coords": { "lat": 40.8115, "lng": -74.0740 }, "status": "open", "crowd_density": 0.3 },
+        "E": { "name": "Gate E - VIP", "coords": { "lat": 40.8130, "lng": -74.0725 }, "status": "open", "crowd_density": 0.2 }
+      },
+      "sections": {
+        "100": { "level": "Lower", "zone": "North", "coords": { "lat": 40.8132, "lng": -74.0745 }, "crowd_density": 0.6, "nearest_gate": "A", "nearest_exit": "exit_north_1" },
+        "114": { "level": "Lower", "zone": "East", "coords": { "lat": 40.8138, "lng": -74.0735 }, "crowd_density": 0.5, "nearest_gate": "B", "nearest_exit": "exit_east_1" },
+        "128": { "level": "Lower", "zone": "South", "coords": { "lat": 40.8118, "lng": -74.0742 }, "crowd_density": 0.75, "nearest_gate": "D", "nearest_exit": "exit_south_1" },
+        "200": { "level": "Mezzanine", "zone": "North", "coords": { "lat": 40.8133, "lng": -74.0746 }, "crowd_density": 0.45, "nearest_gate": "A", "nearest_exit": "exit_north_2" },
+        "214": { "level": "Mezzanine", "zone": "East", "coords": { "lat": 40.8139, "lng": -74.0736 }, "crowd_density": 0.55, "nearest_gate": "B", "nearest_exit": "exit_east_2" },
+        "300": { "level": "Upper", "zone": "North", "coords": { "lat": 40.8134, "lng": -74.0747 }, "crowd_density": 0.35, "nearest_gate": "A", "nearest_exit": "exit_north_3" },
+        "314": { "level": "Upper", "zone": "East", "coords": { "lat": 40.8140, "lng": -74.0737 }, "crowd_density": 0.4, "nearest_gate": "B", "nearest_exit": "exit_east_3" },
+        "328": { "level": "Upper", "zone": "South", "coords": { "lat": 40.8119, "lng": -74.0743 }, "crowd_density": 0.65, "nearest_gate": "D", "nearest_exit": "exit_south_3" }
+      },
+      "concessions": {
+        "food_north_1": { "name": "Stadium Grill - North", "type": "food", "zone": "North", "level": "Lower", "coords": { "lat": 40.8133, "lng": -74.0750 }, "wait_minutes": 8, "accessible": true },
+        "food_east_1": { "name": "Global Bites - East", "type": "food", "zone": "East", "level": "Lower", "coords": { "lat": 40.8139, "lng": -74.0732 }, "wait_minutes": 4, "accessible": true },
+        "food_south_1": { "name": "Pizza Corner - South", "type": "food", "zone": "South", "level": "Lower", "coords": { "lat": 40.8117, "lng": -74.0745 }, "wait_minutes": 12, "accessible": false },
+        "food_mez_1": { "name": "Craft Beer Bar - Mezzanine", "type": "beverage", "zone": "North", "level": "Mezzanine", "coords": { "lat": 40.8134, "lng": -74.0748 }, "wait_minutes": 6, "accessible": true },
+        "food_upper_1": { "name": "Quick Snacks - Upper", "type": "food", "zone": "East", "level": "Upper", "coords": { "lat": 40.8141, "lng": -74.0738 }, "wait_minutes": 3, "accessible": true }
+      },
+      "restrooms": {
+        "restroom_north_lower": { "name": "Restroom - North Lower", "zone": "North", "level": "Lower", "coords": { "lat": 40.8131, "lng": -74.0752 }, "wait_minutes": 5, "accessible": true, "crowd_density": 0.5 },
+        "restroom_east_lower": { "name": "Restroom - East Lower", "zone": "East", "level": "Lower", "coords": { "lat": 40.8137, "lng": -74.0733 }, "wait_minutes": 2, "accessible": true, "crowd_density": 0.3 },
+        "restroom_south_lower": { "name": "Restroom - South Lower", "zone": "South", "level": "Lower", "coords": { "lat": 40.8116, "lng": -74.0744 }, "wait_minutes": 10, "accessible": false, "crowd_density": 0.8 },
+        "restroom_mez_north": { "name": "Restroom - Mezzanine North", "zone": "North", "level": "Mezzanine", "coords": { "lat": 40.8132, "lng": -74.0749 }, "wait_minutes": 3, "accessible": true, "crowd_density": 0.35 },
+        "restroom_upper_east": { "name": "Restroom - Upper East", "zone": "East", "level": "Upper", "coords": { "lat": 40.8139, "lng": -74.0736 }, "wait_minutes": 1, "accessible": true, "crowd_density": 0.2 }
+      },
+      "exits": {
+        "exit_north_1": { "name": "North Exit 1", "zone": "North", "level": "Lower", "coords": { "lat": 40.8136, "lng": -74.0756 }, "crowd_density": 0.5, "accessible": true },
+        "exit_north_2": { "name": "North Exit 2", "zone": "North", "level": "Mezzanine", "coords": { "lat": 40.8135, "lng": -74.0754 }, "crowd_density": 0.3, "accessible": true },
+        "exit_north_3": { "name": "North Exit 3", "zone": "North", "level": "Upper", "coords": { "lat": 40.8134, "lng": -74.0752 }, "crowd_density": 0.25, "accessible": false },
+        "exit_east_1": { "name": "East Exit 1", "zone": "East", "level": "Lower", "coords": { "lat": 40.8142, "lng": -74.0728 }, "crowd_density": 0.4, "accessible": true },
+        "exit_east_2": { "name": "East Exit 2", "zone": "East", "level": "Mezzanine", "coords": { "lat": 40.8141, "lng": -74.0729 }, "crowd_density": 0.35, "accessible": true },
+        "exit_east_3": { "name": "East Exit 3", "zone": "East", "level": "Upper", "coords": { "lat": 40.8140, "lng": -74.0730 }, "crowd_density": 0.2, "accessible": false },
+        "exit_south_1": { "name": "South Exit 1", "zone": "South", "level": "Lower", "coords": { "lat": 40.8113, "lng": -74.0743 }, "crowd_density": 0.7, "accessible": true },
+        "exit_south_3": { "name": "South Exit 3", "zone": "South", "level": "Upper", "coords": { "lat": 40.8114, "lng": -74.0744 }, "crowd_density": 0.55, "accessible": false }
+      },
+      "parking": {
+        "lot_a": { "name": "Lot A - Main", "coords": { "lat": 40.8150, "lng": -74.0770 }, "crowd_density": 0.6 },
+        "lot_b": { "name": "Lot B - East", "coords": { "lat": 40.8155, "lng": -74.0720 }, "crowd_density": 0.3 },
+        "lot_c": { "name": "Lot C - South", "coords": { "lat": 40.8100, "lng": -74.0750 }, "crowd_density": 0.45 }
+      }
+    },
+    "sofi": {
+      "name": "SoFi Stadium",
+      "city": "Inglewood, CA",
+      "capacity": 70240,
+      "coords": { "lat": 33.9535, "lng": -118.3392 },
+      "gates": {
+        "A": { "name": "Gate A - Northwest", "coords": { "lat": 33.9545, "lng": -118.3405 }, "status": "open", "crowd_density": 0.6 },
+        "B": { "name": "Gate B - Northeast", "coords": { "lat": 33.9545, "lng": -118.3380 }, "status": "open", "crowd_density": 0.5 },
+        "C": { "name": "Gate C - South", "coords": { "lat": 33.9525, "lng": -118.3392 }, "status": "open", "crowd_density": 0.7 },
+        "D": { "name": "Gate D - VIP West", "coords": { "lat": 33.9535, "lng": -118.3410 }, "status": "open", "crowd_density": 0.2 }
+      },
+      "sections": {
+        "100": { "level": "Lower", "zone": "North", "coords": { "lat": 33.9540, "lng": -118.3395 }, "crowd_density": 0.55, "nearest_gate": "A", "nearest_exit": "exit_nw_1" },
+        "112": { "level": "Lower", "zone": "East", "coords": { "lat": 33.9538, "lng": -118.3382 }, "crowd_density": 0.6, "nearest_gate": "B", "nearest_exit": "exit_ne_1" },
+        "130": { "level": "Lower", "zone": "South", "coords": { "lat": 33.9528, "lng": -118.3390 }, "crowd_density": 0.8, "nearest_gate": "C", "nearest_exit": "exit_s_1" },
+        "200": { "level": "Upper", "zone": "North", "coords": { "lat": 33.9541, "lng": -118.3396 }, "crowd_density": 0.4, "nearest_gate": "A", "nearest_exit": "exit_nw_2" },
+        "212": { "level": "Upper", "zone": "East", "coords": { "lat": 33.9539, "lng": -118.3383 }, "crowd_density": 0.45, "nearest_gate": "B", "nearest_exit": "exit_ne_2" }
+      },
+      "concessions": {
+        "food_nw_1": { "name": "LA Street Tacos", "type": "food", "zone": "North", "level": "Lower", "coords": { "lat": 33.9542, "lng": -118.3400 }, "wait_minutes": 7, "accessible": true },
+        "food_ne_1": { "name": "Burger Stand", "type": "food", "zone": "East", "level": "Lower", "coords": { "lat": 33.9540, "lng": -118.3378 }, "wait_minutes": 5, "accessible": true },
+        "food_s_1": { "name": "Sushi Bar", "type": "food", "zone": "South", "level": "Lower", "coords": { "lat": 33.9526, "lng": -118.3388 }, "wait_minutes": 10, "accessible": true }
+      },
+      "restrooms": {
+        "restroom_nw_lower": { "name": "Restroom - NW Lower", "zone": "North", "level": "Lower", "coords": { "lat": 33.9543, "lng": -118.3402 }, "wait_minutes": 4, "accessible": true, "crowd_density": 0.4 },
+        "restroom_ne_lower": { "name": "Restroom - NE Lower", "zone": "East", "level": "Lower", "coords": { "lat": 33.9541, "lng": -118.3379 }, "wait_minutes": 6, "accessible": true, "crowd_density": 0.55 },
+        "restroom_s_lower": { "name": "Restroom - South Lower", "zone": "South", "level": "Lower", "coords": { "lat": 33.9527, "lng": -118.3389 }, "wait_minutes": 9, "accessible": false, "crowd_density": 0.75 }
+      },
+      "exits": {
+        "exit_nw_1": { "name": "NW Exit 1", "zone": "North", "level": "Lower", "coords": { "lat": 33.9546, "lng": -118.3407 }, "crowd_density": 0.4, "accessible": true },
+        "exit_nw_2": { "name": "NW Exit 2", "zone": "North", "level": "Upper", "coords": { "lat": 33.9547, "lng": -118.3408 }, "crowd_density": 0.3, "accessible": true },
+        "exit_ne_1": { "name": "NE Exit 1", "zone": "East", "level": "Lower", "coords": { "lat": 33.9547, "lng": -118.3377 }, "crowd_density": 0.35, "accessible": true },
+        "exit_ne_2": { "name": "NE Exit 2", "zone": "East", "level": "Upper", "coords": { "lat": 33.9548, "lng": -118.3378 }, "crowd_density": 0.25, "accessible": false },
+        "exit_s_1": { "name": "South Exit 1", "zone": "South", "level": "Lower", "coords": { "lat": 33.9523, "lng": -118.3391 }, "crowd_density": 0.65, "accessible": true }
+      },
+      "parking": {
+        "lot_pink": { "name": "Pink Lot", "coords": { "lat": 33.9560, "lng": -118.3410 }, "crowd_density": 0.5 },
+        "lot_yellow": { "name": "Yellow Lot", "coords": { "lat": 33.9555, "lng": -118.3370 }, "crowd_density": 0.35 }
+      }
+    },
+    "att": {
+      "name": "AT&T Stadium",
+      "city": "Arlington, TX",
+      "capacity": 80000,
+      "coords": { "lat": 32.7473, "lng": -97.0945 },
+      "gates": {
+        "A": { "name": "Gate A - North", "coords": { "lat": 32.7485, "lng": -97.0945 }, "status": "open", "crowd_density": 0.5 },
+        "B": { "name": "Gate B - East", "coords": { "lat": 32.7473, "lng": -97.0930 }, "status": "open", "crowd_density": 0.6 },
+        "C": { "name": "Gate C - South", "coords": { "lat": 32.7460, "lng": -97.0945 }, "status": "closed", "crowd_density": 0.0 },
+        "D": { "name": "Gate D - West", "coords": { "lat": 32.7473, "lng": -97.0960 }, "status": "open", "crowd_density": 0.4 }
+      },
+      "sections": {
+        "100": { "level": "Lower", "zone": "North", "coords": { "lat": 32.7480, "lng": -97.0945 }, "crowd_density": 0.5, "nearest_gate": "A", "nearest_exit": "exit_n_1" },
+        "120": { "level": "Lower", "zone": "East", "coords": { "lat": 32.7475, "lng": -97.0932 }, "crowd_density": 0.65, "nearest_gate": "B", "nearest_exit": "exit_e_1" },
+        "140": { "level": "Lower", "zone": "South", "coords": { "lat": 32.7465, "lng": -97.0945 }, "crowd_density": 0.7, "nearest_gate": "C", "nearest_exit": "exit_s_1" },
+        "200": { "level": "Upper", "zone": "North", "coords": { "lat": 32.7481, "lng": -97.0946 }, "crowd_density": 0.35, "nearest_gate": "A", "nearest_exit": "exit_n_2" },
+        "220": { "level": "Upper", "zone": "East", "coords": { "lat": 32.7476, "lng": -97.0933 }, "crowd_density": 0.4, "nearest_gate": "B", "nearest_exit": "exit_e_2" }
+      },
+      "concessions": {
+        "food_n_1": { "name": "Texas BBQ Pit", "type": "food", "zone": "North", "level": "Lower", "coords": { "lat": 32.7482, "lng": -97.0948 }, "wait_minutes": 9, "accessible": true },
+        "food_e_1": { "name": "Nacho Station", "type": "food", "zone": "East", "level": "Lower", "coords": { "lat": 32.7474, "lng": -97.0931 }, "wait_minutes": 3, "accessible": true },
+        "food_w_1": { "name": "Beverage Bar", "type": "beverage", "zone": "West", "level": "Lower", "coords": { "lat": 32.7474, "lng": -97.0958 }, "wait_minutes": 5, "accessible": true }
+      },
+      "restrooms": {
+        "restroom_n_lower": { "name": "Restroom - North Lower", "zone": "North", "level": "Lower", "coords": { "lat": 32.7483, "lng": -97.0947 }, "wait_minutes": 6, "accessible": true, "crowd_density": 0.5 },
+        "restroom_e_lower": { "name": "Restroom - East Lower", "zone": "East", "level": "Lower", "coords": { "lat": 32.7475, "lng": -97.0931 }, "wait_minutes": 2, "accessible": true, "crowd_density": 0.25 },
+        "restroom_s_lower": { "name": "Restroom - South Lower", "zone": "South", "level": "Lower", "coords": { "lat": 32.7463, "lng": -97.0946 }, "wait_minutes": 8, "accessible": false, "crowd_density": 0.65 }
+      },
+      "exits": {
+        "exit_n_1": { "name": "North Exit 1", "zone": "North", "level": "Lower", "coords": { "lat": 32.7487, "lng": -97.0946 }, "crowd_density": 0.4, "accessible": true },
+        "exit_n_2": { "name": "North Exit 2", "zone": "North", "level": "Upper", "coords": { "lat": 32.7488, "lng": -97.0947 }, "crowd_density": 0.3, "accessible": true },
+        "exit_e_1": { "name": "East Exit 1", "zone": "East", "level": "Lower", "coords": { "lat": 32.7474, "lng": -97.0928 }, "crowd_density": 0.5, "accessible": true },
+        "exit_e_2": { "name": "East Exit 2", "zone": "East", "level": "Upper", "coords": { "lat": 32.7475, "lng": -97.0929 }, "crowd_density": 0.35, "accessible": false },
+        "exit_s_1": { "name": "South Exit 1", "zone": "South", "level": "Lower", "coords": { "lat": 32.7458, "lng": -97.0946 }, "crowd_density": 0.6, "accessible": true }
+      },
+      "parking": {
+        "lot_1": { "name": "Lot 1 - North", "coords": { "lat": 32.7500, "lng": -97.0945 }, "crowd_density": 0.45 },
+        "lot_2": { "name": "Lot 2 - East", "coords": { "lat": 32.7473, "lng": -97.0910 }, "crowd_density": 0.3 }
+      }
+    }
+  },
+  "crowd_density_thresholds": {
+    "low": 0.3,
+    "medium": 0.6,
+    "high": 0.8,
+    "critical": 0.95
+  },
+  "alert_thresholds": {
+    "overcrowding_warning": 0.8,
+    "overcrowding_critical": 0.95,
+    "gate_queue_warning_minutes": 15
+  }
+}
