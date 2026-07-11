@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FIFA World Cup 2026 Stadium Assistant — AI-powered fan navigation and crowd management for real-time stadium guidance.">
+  <title>FIFA World Cup 2026 — Stadium Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header -->
+  <header class="header" role="banner">
+    <div class="header-content">
+      <div class="logo-group">
+        <span class="logo-icon" aria-hidden="true">⚽</span>
+        <div>
+          <h1 class="logo-title">Stadium Assistant</h1>
+          <p class="logo-subtitle">FIFA World Cup 2026</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <label for="stadium-select" class="sr-only">Select Stadium</label>
+        <select id="stadium-select" class="select-control" aria-label="Select Stadium">
+          <option value="metlife">MetLife Stadium — NJ</option>
+          <option value="sofi">SoFi Stadium — CA</option>
+          <option value="att">AT&T Stadium — TX</option>
+        </select>
+        <label for="section-select" class="sr-only">Select Section</label>
+        <select id="section-select" class="select-control" aria-label="Select Your Section"></select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Alert Banner -->
+  <div id="alert-banner" class="alert-banner" role="alert" aria-live="polite" hidden>
+    <span class="alert-icon" aria-hidden="true">⚠️</span>
+    <span id="alert-text"></span>
+    <button id="alert-dismiss" class="alert-dismiss" aria-label="Dismiss alert">&times;</button>
+  </div>
+
+  <main id="main-content" class="main-layout">
+    <!-- Dashboard Panel -->
+    <aside class="dashboard-panel" aria-label="Stadium Dashboard">
+      <section class="panel-card" aria-labelledby="gates-heading">
+        <h2 id="gates-heading" class="panel-title">
+          <span aria-hidden="true">🚪</span> Gate Status
+        </h2>
+        <div id="gates-grid" class="gates-grid" role="list"></div>
+      </section>
+
+      <section class="panel-card" aria-labelledby="crowd-heading">
+        <h2 id="crowd-heading" class="panel-title">
+          <span aria-hidden="true">👥</span> Crowd Density
+        </h2>
+        <div id="crowd-indicators" class="crowd-indicators" role="list"></div>
+      </section>
+
+      <section class="panel-card" aria-labelledby="match-heading">
+        <h2 id="match-heading" class="panel-title">
+          <span aria-hidden="true">🏆</span> Match Info
+        </h2>
+        <div id="match-info" class="match-info"></div>
+      </section>
+
+      <section class="panel-card" aria-labelledby="quick-heading">
+        <h2 id="quick-heading" class="panel-title">
+          <span aria-hidden="true">⚡</span> Quick Actions
+        </h2>
+        <div class="quick-actions">
+          <button class="quick-btn" data-query="Where is the nearest restroom with the shortest wait?" aria-label="Find nearest restroom">
+            <span aria-hidden="true">🚻</span> Restroom
+          </button>
+          <button class="quick-btn" data-query="Where can I get food with the shortest queue?" aria-label="Find food stands">
+            <span aria-hidden="true">🍔</span> Food
+          </button>
+          <button class="quick-btn" data-query="What is the nearest exit with low crowd density?" aria-label="Find nearest exit">
+            <span aria-hidden="true">🚪</span> Exit
+          </button>
+          <button class="quick-btn" data-query="Which gate has the lowest crowd right now?" aria-label="Check gate crowds">
+            <span aria-hidden="true">🎫</span> Gates
+          </button>
+          <button class="quick-btn" data-query="What are the current crowd conditions and any alerts?" aria-label="Check crowd status">
+            <span aria-hidden="true">📊</span> Crowd
+          </button>
+          <button class="quick-btn" data-query="I need accessibility assistance, what accessible routes are available?" aria-label="Accessibility help">
+            <span aria-hidden="true">♿</span> Accessible
+          </button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Chat Panel -->
+    <section class="chat-panel" aria-label="Chat with Stadium Assistant">
+      <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="Conversation">
+        <div class="message assistant-message">
+          <div class="message-avatar" aria-hidden="true">⚽</div>
+          <div class="message-content">
+            <p>Welcome to the <strong>FIFA World Cup 2026 Stadium Assistant</strong>! 🏆</p>
+            <p>I can help you navigate the stadium, find restrooms and food with the shortest wait times, check gate crowd levels, and get real-time directions.</p>
+            <p>Select your stadium and section above, then ask me anything or use the quick action buttons!</p>
+          </div>
+        </div>
+      </div>
+      <form id="chat-form" class="chat-input-area" aria-label="Send a message">
+        <label for="chat-input" class="sr-only">Type your question</label>
+        <input
+          id="chat-input"
+          type="text"
+          class="chat-input"
+          placeholder="Ask me anything... e.g. 'Where's the nearest exit with low crowd?'"
+          autocomplete="off"
+          maxlength="500"
+          aria-label="Type your question"
+        >
+        <button type="submit" id="send-btn" class="send-btn" aria-label="Send message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <p>Powered by <strong>Google Gemini AI</strong> &amp; <strong>Google Maps Platform</strong> — Built for GDG Solutions Challenge 2026</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
