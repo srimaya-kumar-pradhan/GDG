@@ -42,7 +42,10 @@ function initGemini(apiKey) {
     return false;
   }
   genAI = new GoogleGenerativeAI(apiKey);
-  model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    systemInstruction: SYSTEM_PROMPT,
+  });
   return true;
 }
 
@@ -63,7 +66,6 @@ FAN'S QUESTION: ${userMessage}`;
   try {
     const chat = model.startChat({
       history: [],
-      systemInstruction: SYSTEM_PROMPT,
     });
 
     const result = await chat.sendMessage(contextPrompt);

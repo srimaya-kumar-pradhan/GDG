@@ -94,6 +94,31 @@
       </section>
     </aside>
 
+    <!-- Map Panel -->
+    <section class="map-panel" aria-label="Interactive Stadium Map">
+      <div class="panel-card map-card">
+        <h2 class="panel-title">
+          <span aria-hidden="true">🗺️</span> Stadium Visualizer
+        </h2>
+        <div id="map-container-wrapper">
+          <div id="stadium-map" role="application" aria-label="Google Map showing gates and crowd levels">
+            <div class="map-placeholder">
+              <span class="logo-icon">⚽</span>
+              <p>Initializing Google Maps...</p>
+            </div>
+          </div>
+        </div>
+        <div class="map-legend" role="presentation">
+          <span class="legend-item"><span class="legend-dot low"></span> Low Crowd</span>
+          <span class="legend-item"><span class="legend-dot moderate"></span> Moderate</span>
+          <span class="legend-item"><span class="legend-dot high"></span> High</span>
+          <span class="legend-item"><span class="legend-dot critical"></span> Critical</span>
+          <span class="legend-item"><span class="legend-dot gate-closed"></span> Closed Gate</span>
+          <span class="legend-item"><span class="legend-dot user-pos"></span> Your Section</span>
+        </div>
+      </div>
+    </section>
+
     <!-- Chat Panel -->
     <section class="chat-panel" aria-label="Chat with Stadium Assistant">
       <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="Conversation">
@@ -131,6 +156,8 @@
     <p>Powered by <strong>Google Gemini AI</strong> &amp; <strong>Google Maps Platform</strong> — Built for GDG Solutions Challenge 2026</p>
   </footer>
 
+  <script src="config.js"></script>
+  <script src="map.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

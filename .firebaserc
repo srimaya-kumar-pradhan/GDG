@@ -1,5 +1,5 @@
 {
-  "projects": {},
-  "targets": {},
-  "etags": {}
+  "projects": {
+    "default": "venueflow-ai-493608"
+  }
 }

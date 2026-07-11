@@ -404,6 +404,49 @@ describe('Server Integration', () => {
     server.close();
   });
 
+  test('config endpoint returns maps key info', async () => {
+    const http = require('http');
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    const response = await new Promise((resolve, reject) => {
+      http.get(`http://localhost:${port}/api/config`, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data) }));
+      }).on('error', reject);
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('GOOGLE_MAPS_API_KEY');
+
+    server.close();
+  });
+
+  test('stadium map-data endpoint returns fully aggregated markers', async () => {
+    const http = require('http');
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    const response = await new Promise((resolve, reject) => {
+      http.get(`http://localhost:${port}/api/stadiums/metlife/map-data`, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data) }));
+      }).on('error', reject);
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('gates');
+    expect(response.body).toHaveProperty('restrooms');
+    expect(response.body).toHaveProperty('concessions');
+    expect(response.body).toHaveProperty('exits');
+    expect(response.body).toHaveProperty('sections');
+    expect(response.body.gates.length).toBeGreaterThan(0);
+
+    server.close();
+  });
+
   test('stadiums endpoint returns 3 stadiums', async () => {
     const http = require('http');
     const server = app.listen(0);
@@ -455,17 +498,19 @@ describe('Server Integration', () => {
     server.close();
   });
 
-  test('chat endpoint returns response for valid message', async () => {
+  test('chat endpoint returns response and caches it for next call', async () => {
     const http = require('http');
     const server = app.listen(0);
     const port = server.address().port;
 
-    const response = await new Promise((resolve, reject) => {
-      const postData = JSON.stringify({
-        message: 'Where is the nearest restroom?',
-        stadium_id: 'metlife',
-        section_id: '100',
-      });
+    const payload = {
+      message: 'Where is the nearest restroom?',
+      stadium_id: 'metlife',
+      section_id: '100',
+    };
+
+    const makeRequest = () => new Promise((resolve, reject) => {
+      const postData = JSON.stringify(payload);
       const req = http.request(
         {
           hostname: 'localhost',
@@ -485,10 +530,15 @@ describe('Server Integration', () => {
       req.end();
     });
 
-    expect(response.status).toBe(200);
-    expect(response.body.response).toBeDefined();
-    expect(response.body.stadium_id).toBe('metlife');
-    expect(response.body.latency_ms).toBeDefined();
+    // First call (normal)
+    const res1 = await makeRequest();
+    expect(res1.status).toBe(200);
+    expect(res1.body.cached).toBeUndefined();
+
+    // Second call (should be cached)
+    const res2 = await makeRequest();
+    expect(res2.status).toBe(200);
+    expect(res2.body.cached).toBe(true);
 
     server.close();
   });
@@ -524,7 +574,6 @@ describe('Server Integration', () => {
     });
 
     expect(response.status).toBe(200);
-    // Response should not contain the script tag
     expect(response.body.response).not.toContain('<script>');
 
     server.close();

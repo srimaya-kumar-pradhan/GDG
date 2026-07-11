@@ -8,6 +8,7 @@
 !.env.example
 *.env
 env.yaml
+public/config.js
 
 # Firebase service account keys (ALL patterns)
 *service-account*.json

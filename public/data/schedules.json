@@ -1,0 +1,70 @@
+{
+  "matches": [
+    {
+      "id": "M01",
+      "stadium": "metlife",
+      "date": "2026-06-11",
+      "time": "20:00",
+      "team_home": "United States",
+      "team_away": "England",
+      "group": "Group A",
+      "phase": "Group Stage",
+      "status": "upcoming",
+      "gates_open": "17:00",
+      "expected_attendance": 82000,
+      "halftime_duration_minutes": 15
+    },
+    {
+      "id": "M02",
+      "stadium": "sofi",
+      "date": "2026-06-12",
+      "time": "18:00",
+      "team_home": "Mexico",
+      "team_away": "Argentina",
+      "group": "Group B",
+      "phase": "Group Stage",
+      "status": "live",
+      "current_minute": 34,
+      "score_home": 0,
+      "score_away": 1,
+      "gates_open": "15:00",
+      "expected_attendance": 70000,
+      "halftime_duration_minutes": 15
+    },
+    {
+      "id": "M03",
+      "stadium": "att",
+      "date": "2026-06-13",
+      "time": "21:00",
+      "team_home": "Brazil",
+      "team_away": "Germany",
+      "group": "Group C",
+      "phase": "Group Stage",
+      "status": "upcoming",
+      "gates_open": "18:00",
+      "expected_attendance": 79000,
+      "halftime_duration_minutes": 15
+    },
+    {
+      "id": "M04",
+      "stadium": "metlife",
+      "date": "2026-07-19",
+      "time": "20:00",
+      "team_home": "TBD",
+      "team_away": "TBD",
+      "group": null,
+      "phase": "Final",
+      "status": "upcoming",
+      "gates_open": "16:00",
+      "expected_attendance": 82500,
+      "halftime_duration_minutes": 15
+    }
+  ],
+  "event_phases": {
+    "pre_match": { "label": "Pre-Match", "crowd_pattern": "arriving", "description": "Fans entering stadium, gates busy" },
+    "first_half": { "label": "First Half", "crowd_pattern": "seated", "description": "Most fans seated, concessions less busy" },
+    "halftime": { "label": "Halftime", "crowd_pattern": "peak_movement", "description": "Peak crowd movement — restrooms and concessions busiest" },
+    "second_half": { "label": "Second Half", "crowd_pattern": "seated", "description": "Fans seated, lighter concourse traffic" },
+    "post_match": { "label": "Post-Match", "crowd_pattern": "exiting", "description": "Mass exit — exits and parking congested" }
+  }
+}

@@ -2,7 +2,9 @@
 
 **A GenAI-powered fan navigation and crowd management assistant for FIFA World Cup 2026 stadiums.**
 
-The Stadium Assistant uses **Google Gemini AI** to provide real-time, conversational guidance to fans — helping them find restrooms, food, exits, and navigate between sections while avoiding crowds and bottlenecks.
+🚀 **Live Deployment URL (Free-Tier Google Stack):** [https://venueflow-ai-493608.web.app](https://venueflow-ai-493608.web.app)
+
+The Stadium Assistant uses **Google Gemini AI** and **Google Maps Platform** to provide real-time, conversational guidance and map-based visualizations to fans — helping them find restrooms, food, exits, and navigate between sections while avoiding crowds and bottlenecks.
 
 ---
 
@@ -190,14 +192,15 @@ GDG/
 
 ## 🛠️ Google Technologies Used
 
-| Component | Google Technology |
-|-----------|-------------------|
-| **AI/GenAI** | Google Gemini API (`gemini-2.0-flash` via `@google/generative-ai` SDK) |
-| **Maps** | Google Maps Platform (optional enhancement for visual routing) |
-| **Fonts** | Google Fonts (Inter) |
-| **Hosting** | Firebase Hosting compatible (static frontend) |
+| Component | Google Technology | Status | Description |
+|-----------|-------------------|--------|-------------|
+| **AI/GenAI** | Google Gemini API (`gemini-2.0-flash`) | Active | Powers conversational assistant (Express server + direct client-side fallback) |
+| **Maps** | Google Maps Platform (Maps JS API) | Active | Interactive stadium maps overlaying gates, restrooms, exits, and crowd densities |
+| **Fonts** | Google Fonts (Inter) | Active | High-readability premium typography for stadium environments |
+| **Hosting** | Firebase Hosting (Spark plan) | Active | Fast, zero-cost, CDN-cached hosting for serverless browser application |
 
 No OpenAI, Anthropic, AWS, Azure, or other third-party AI/cloud services are used.
+
 
 ---
 
