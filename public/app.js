@@ -23,6 +23,10 @@
 
   const API_BASE = '';
 
+  // ─── Constants ───
+  const DASHBOARD_REFRESH_INTERVAL_MS = 30000;
+  const DEFAULT_RESULTS_LIMIT = 3;
+
   // ─── State ───
   let isLoading = false;
   let appConfig = null;
@@ -37,7 +41,9 @@
     att: ['100', '120', '140', '200', '220'],
   };
 
-  // ─── Initialize ───
+  /**
+   * Initializes the application frontend.
+   */
   async function init() {
     populateSections();
     await loadLocalData();
@@ -46,7 +52,9 @@
     loadGoogleMaps();
   }
 
-  // Load static JSON data files for local fallback execution
+  /**
+   * Loads static fallback JSON data files from the frontend.
+   */
   async function loadLocalData() {
     try {
       const [stadiumsRes, schedulesRes] = await Promise.all([
@@ -65,7 +73,34 @@
     }
   }
 
-  // Dynamically load Google Maps script using the key from the backend config
+  /**
+   * Helper to load the Google Maps API script dynamically.
+   * @param {string} apiKey - The Google Maps API Key.
+   */
+  function loadMapsScript(apiKey) {
+    if (!apiKey) return;
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapAsync`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  }
+
+  /**
+   * Registers the Maps initialization callback globally.
+   */
+  function setupMapCallback() {
+    window.initMapAsync = () => {
+      if (window.StadiumMap) {
+        window.StadiumMap.init('stadium-map', stadiumSelect.value);
+        updateUserMapPosition();
+      }
+    };
+  }
+
+  /**
+   * Dynamically loads Google Maps script using backend config key or fallback local config.
+   */
   async function loadGoogleMaps() {
     try {
       const res = await fetch(`${API_BASE}/api/config`);
@@ -78,38 +113,21 @@
         return;
       }
 
-      // Attach callback to window object so Maps API can trigger it
-      window.initMapAsync = () => {
-        if (window.StadiumMap) {
-          window.StadiumMap.init('stadium-map', stadiumSelect.value);
-          updateUserMapPosition();
-        }
-      };
-
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${config.GOOGLE_MAPS_API_KEY}&callback=initMapAsync`;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
+      setupMapCallback();
+      loadMapsScript(config.GOOGLE_MAPS_API_KEY);
     } catch (err) {
       console.warn('Failed to fetch API config, loading frontend config fallback:', err);
       appConfig = window.APP_CONFIG || null;
       if (appConfig && appConfig.GOOGLE_MAPS_API_KEY) {
-        window.initMapAsync = () => {
-          if (window.StadiumMap) {
-            window.StadiumMap.init('stadium-map', stadiumSelect.value);
-            updateUserMapPosition();
-          }
-        };
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${appConfig.GOOGLE_MAPS_API_KEY}&callback=initMapAsync`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+        setupMapCallback();
+        loadMapsScript(appConfig.GOOGLE_MAPS_API_KEY);
       }
     }
   }
 
+  /**
+   * Populates the section drop-down based on the selected stadium.
+   */
   function populateSections() {
     const stadium = stadiumSelect.value;
     const sections = stadiumSections[stadium] || [];
@@ -122,6 +140,9 @@
     });
   }
 
+  /**
+   * Updates the user's position indicator on the Google Map.
+   */
   function updateUserMapPosition() {
     if (window.StadiumMap && window.google) {
       fetch(`${API_BASE}/api/stadiums/${stadiumSelect.value}/sections/${sectionSelect.value}`)
@@ -145,6 +166,9 @@
     }
   }
 
+  /**
+   * Sets up interactive frontend event listeners.
+   */
   function setupEventListeners() {
     stadiumSelect.addEventListener('change', () => {
       populateSections();
@@ -186,7 +210,9 @@
     });
   }
 
-  // ─── Dashboard Loading ───
+  /**
+   * Loads dashboard statistics and updates the operational panels.
+   */
   async function loadDashboard() {
     const stadium = stadiumSelect.value;
     try {
@@ -244,6 +270,9 @@
 
   // ─── Client-Side Fallback Engine ───
 
+  /**
+   * Helper to resolve density to a text label.
+   */
   function crowdLabel(density) {
     if (density <= 0.3) return 'low';
     if (density <= 0.6) return 'moderate';
@@ -251,6 +280,9 @@
     return 'critical';
   }
 
+  /**
+   * Retrieves gates locally in fallback offline mode.
+   */
   function localGetGates(stadiumId) {
     const stadium = localStadiums && localStadiums[stadiumId];
     if (!stadium) return [];
@@ -261,6 +293,9 @@
     }));
   }
 
+  /**
+   * Retrieves nearby facilities locally in fallback offline mode.
+   */
   function localGetNearby(stadiumId, sectionId) {
     const stadium = localStadiums && localStadiums[stadiumId];
     if (!stadium || !stadium.sections[sectionId]) return { restrooms: [], concessions: [], exits: [] };
@@ -304,9 +339,16 @@
     });
     exits.sort((a, b) => a.distance_meters - b.distance_meters);
 
-    return { restrooms: restrooms.slice(0, 3), concessions: concessions.slice(0, 3), exits: exits.slice(0, 3) };
+    return {
+      restrooms: restrooms.slice(0, DEFAULT_RESULTS_LIMIT),
+      concessions: concessions.slice(0, DEFAULT_RESULTS_LIMIT),
+      exits: exits.slice(0, DEFAULT_RESULTS_LIMIT)
+    };
   }
 
+  /**
+   * Retrieves match information locally in fallback offline mode.
+   */
   function localGetMatch(stadiumId) {
     if (!localSchedules) return null;
     const match = localSchedules.matches.find((m) => m.stadium === stadiumId);
@@ -318,6 +360,9 @@
     return { ...match, phase };
   }
 
+  /**
+   * Generates mock operational warnings in local fallback offline mode.
+   */
   function localCheckAlerts(stadiumId) {
     const stadium = localStadiums && localStadiums[stadiumId];
     if (!stadium) return [];
@@ -335,6 +380,9 @@
     return alerts;
   }
 
+  /**
+   * Calculates distance between coordinates.
+   */
   function haversineDistance(coord1, coord2) {
     const R = 6371000; // Earth's radius in meters
     const toRad = (deg) => (deg * Math.PI) / 180;
@@ -346,6 +394,9 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
+  /**
+   * Renders gate details on the dashboard gate status grid.
+   */
   function renderGates(gates) {
     gatesGrid.innerHTML = '';
     gates.forEach((gate) => {
@@ -361,6 +412,21 @@
     });
   }
 
+  /**
+   * Translates a crowd level into a CSS custom variable color name suffix.
+   * @param {string} level - The crowd level ('low', 'moderate', 'high', 'critical').
+   * @returns {string} The color suffix ('green', 'blue', 'orange', or 'red').
+   */
+  function crowdLevelToColor(level) {
+    if (level === 'low') return 'green';
+    if (level === 'moderate') return 'blue';
+    if (level === 'high') return 'orange';
+    return 'red';
+  }
+
+  /**
+   * Renders crowd layout bar indicators on the dashboard panel.
+   */
   function renderCrowdIndicators(data) {
     crowdIndicators.innerHTML = '';
 
@@ -380,12 +446,15 @@
         <div class="crowd-bar-container">
           <div class="crowd-bar ${f.level}" style="width: ${pct}%"></div>
         </div>
-        <div class="crowd-percentage" style="color: var(--accent-${f.level === 'low' ? 'green' : f.level === 'moderate' ? 'blue' : f.level === 'high' ? 'orange' : 'red'})">${pct}%</div>
+        <div class="crowd-percentage" style="color: var(--accent-${crowdLevelToColor(f.level)})">${pct}%</div>
       `;
       crowdIndicators.appendChild(indicator);
     });
   }
 
+  /**
+   * Renders scheduling details on the dashboard match info panel.
+   */
   function renderMatchInfo(match) {
     if (!match) {
       matchInfo.innerHTML = '<p class="match-details">No match currently scheduled</p>';
@@ -407,12 +476,19 @@
     matchInfo.innerHTML = html;
   }
 
+  /**
+   * Shows an operational alert at the top of the interface.
+   */
   function showAlert(message) {
     alertText.textContent = message;
     alertBanner.hidden = false;
   }
 
   // ─── Chat Logic ───
+
+  /**
+   * Sends a user query to the AI backend assistant, displaying typing indicators and updating states.
+   */
   async function sendMessage(text) {
     if (isLoading) return;
 
@@ -478,7 +554,9 @@
     chatInput.focus();
   }
 
-  // Client-side direct fallback query path when Express backend is unreachable or limited
+  /**
+   * Sends a client-side direct request to Gemini API key when backend Express route is unavailable.
+   */
   async function sendDirectGeminiQuery(text) {
     const apiKey = appConfig && appConfig.GEMINI_API_KEY;
     if (!apiKey) return false;
@@ -512,7 +590,9 @@ Provide a short, direct, friendly response with navigation guidance. Keep it to 
     }
   }
 
-  // Client-side local fallback responder for offline/static deployment mode
+  /**
+   * Generates a conversational response in offline/local-only fallback mode.
+   */
   function localGenerateFallbackResponse(userMessage) {
     const msg = userMessage.toLowerCase();
     const stadiumId = stadiumSelect.value;
@@ -558,7 +638,9 @@ Provide a short, direct, friendly response with navigation guidance. Keep it to 
     return `⚽ I am your FIFA World Cup 2026 Stadium Assistant! I can help you with:\n\n• Finding restrooms, food stands, or exits with the shortest wait times\n• Navigating between gates and sections\n• Real-time crowd density checking\n• Accessible routes filtering\n\nAsk me anything like "Where is the nearest restroom?" or "Which gate has the lowest crowd?"`;
   }
 
-  // Parse assistant response to highlight recommended location on map
+  /**
+   * Highlights coordinates/markers on map corresponding to landmark/facilities.
+   */
   function highlightSuggestedLocations(responseText) {
     if (!window.StadiumMap || !window.google) return;
 
@@ -603,6 +685,9 @@ Provide a short, direct, friendly response with navigation guidance. Keep it to 
     }
   }
 
+  /**
+   * Renders a message element in the chat thread.
+   */
   function addMessage(text, sender) {
     const msg = document.createElement('div');
     msg.className = `message ${sender}-message`;
@@ -630,6 +715,9 @@ Provide a short, direct, friendly response with navigation guidance. Keep it to 
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
+  /**
+   * Creates and displays a typing bubble indicator.
+   */
   function addTypingIndicator() {
     const msg = document.createElement('div');
     msg.className = 'message assistant-message';
@@ -651,6 +739,9 @@ Provide a short, direct, friendly response with navigation guidance. Keep it to 
     return msg;
   }
 
+  /**
+   * Dismisses the typing bubble indicator.
+   */
   function removeTypingIndicator(el) {
     if (el && el.parentNode) {
       el.parentNode.removeChild(el);
@@ -667,7 +758,7 @@ Provide a short, direct, friendly response with navigation guidance. Keep it to 
   // ─── Auto-refresh dashboard every 30s ───
   setInterval(() => {
     if (!isLoading) loadDashboard();
-  }, 30000);
+  }, DASHBOARD_REFRESH_INTERVAL_MS);
 
   // Boot
   document.addEventListener('DOMContentLoaded', init);

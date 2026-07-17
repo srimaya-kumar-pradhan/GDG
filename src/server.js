@@ -25,6 +25,10 @@ const { sanitize, ResponseCache, RateLimiter } = require('./utils');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// --- Constants ---
+const DEFAULT_STADIUM_ID = 'metlife';
+const DEFAULT_SECTION_ID = '100';
+
 // Initialize Cache and Rate Limiter
 const cache = new ResponseCache();
 const limiter = new RateLimiter();
@@ -57,9 +61,93 @@ app.use((req, res, next) => {
 const geminiReady = initGemini(process.env.GEMINI_API_KEY);
 console.log(geminiReady ? '✅ Gemini API initialized' : '⚠️ Gemini API not configured — using fallback responses');
 
+// --- Helper formatters for map aggregated markers ---
+
+/**
+ * Formats stadium gates data for front-end map markers.
+ * @param {Object} gates - Raw gates key-value dictionary.
+ * @returns {Array<Object>} Formatted gates list.
+ */
+function formatGatesForMap(gates) {
+  return Object.entries(gates).map(([id, g]) => ({
+    id,
+    name: g.name,
+    coords: g.coords,
+    status: g.status,
+    crowd_density: g.crowd_density,
+    crowd_level: crowdLabel(g.crowd_density),
+  }));
+}
+
+/**
+ * Formats stadium restrooms data for front-end map markers.
+ * @param {Object} restrooms - Raw restrooms key-value dictionary.
+ * @returns {Array<Object>} Formatted restrooms list.
+ */
+function formatRestroomsForMap(restrooms) {
+  return Object.entries(restrooms).map(([id, r]) => ({
+    id,
+    name: r.name,
+    coords: r.coords,
+    wait_minutes: r.wait_minutes,
+    accessible: r.accessible,
+    crowd_density: r.crowd_density,
+    crowd_level: crowdLabel(r.crowd_density),
+  }));
+}
+
+/**
+ * Formats stadium concessions data for front-end map markers.
+ * @param {Object} concessions - Raw concessions key-value dictionary.
+ * @returns {Array<Object>} Formatted concessions list.
+ */
+function formatConcessionsForMap(concessions) {
+  return Object.entries(concessions).map(([id, c]) => ({
+    id,
+    name: c.name,
+    coords: c.coords,
+    wait_minutes: c.wait_minutes,
+    accessible: c.accessible,
+    type: c.type,
+  }));
+}
+
+/**
+ * Formats stadium exits data for front-end map markers.
+ * @param {Object} exits - Raw exits key-value dictionary.
+ * @returns {Array<Object>} Formatted exits list.
+ */
+function formatExitsForMap(exits) {
+  return Object.entries(exits).map(([id, e]) => ({
+    id,
+    name: e.name,
+    coords: e.coords,
+    accessible: e.accessible,
+    crowd_density: e.crowd_density,
+    crowd_level: crowdLabel(e.crowd_density),
+  }));
+}
+
+/**
+ * Formats stadium sections data for front-end map markers.
+ * @param {Object} sections - Raw sections key-value dictionary.
+ * @returns {Array<Object>} Formatted sections list.
+ */
+function formatSectionsForMap(sections) {
+  return Object.entries(sections).map(([id, s]) => ({
+    id,
+    coords: s.coords,
+    crowd_density: s.crowd_density,
+    crowd_level: crowdLabel(s.crowd_density),
+  }));
+}
+
 // ─── API Routes ──────────────────────────────────────────
 
-// Health check
+/**
+ * GET /api/health
+ * Health check endpoint indicating service and Gemini connection status.
+ */
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -69,12 +157,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// List stadiums
+/**
+ * GET /api/stadiums
+ * Returns list of all available stadiums.
+ */
 app.get('/api/stadiums', (req, res) => {
   res.json({ stadiums: listStadiums() });
 });
 
-// Config endpoint for Maps and Gemini keys
+/**
+ * GET /api/config
+ * Exposes API keys/configuration options needed by the frontend.
+ */
 app.get('/api/config', (req, res) => {
   res.json({
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY || null,
@@ -82,75 +176,48 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-// Single batch map data endpoint for high client efficiency
+/**
+ * GET /api/stadiums/:id/map-data
+ * Returns complete layout markers (gates, restrooms, concessions, exits, sections) for a stadium.
+ */
 app.get('/api/stadiums/:id/map-data', (req, res) => {
   const stadiumId = req.params.id;
   const stadium = getStadium(stadiumId);
   if (!stadium) return res.status(404).json({ error: 'Stadium not found' });
 
-  // Map elements
-  const gates = Object.entries(stadium.gates).map(([id, g]) => ({
-    id,
-    name: g.name,
-    coords: g.coords,
-    status: g.status,
-    crowd_density: g.crowd_density,
-    crowd_level: crowdLabel(g.crowd_density),
-  }));
-
-  const restrooms = Object.entries(stadium.restrooms).map(([id, r]) => ({
-    id,
-    name: r.name,
-    coords: r.coords,
-    wait_minutes: r.wait_minutes,
-    accessible: r.accessible,
-    crowd_density: r.crowd_density,
-    crowd_level: crowdLabel(r.crowd_density),
-  }));
-
-  const concessions = Object.entries(stadium.concessions).map(([id, c]) => ({
-    id,
-    name: c.name,
-    coords: c.coords,
-    wait_minutes: c.wait_minutes,
-    accessible: c.accessible,
-    type: c.type,
-  }));
-
-  const exits = Object.entries(stadium.exits).map(([id, e]) => ({
-    id,
-    name: e.name,
-    coords: e.coords,
-    accessible: e.accessible,
-    crowd_density: e.crowd_density,
-    crowd_level: crowdLabel(e.crowd_density),
-  }));
-
-  const sections = Object.entries(stadium.sections).map(([id, s]) => ({
-    id,
-    coords: s.coords,
-    crowd_density: s.crowd_density,
-    crowd_level: crowdLabel(s.crowd_density),
-  }));
+  const gates = formatGatesForMap(stadium.gates);
+  const restrooms = formatRestroomsForMap(stadium.restrooms);
+  const concessions = formatConcessionsForMap(stadium.concessions);
+  const exits = formatExitsForMap(stadium.exits);
+  const sections = formatSectionsForMap(stadium.sections);
 
   res.json({ gates, restrooms, concessions, exits, sections });
 });
 
-// Gate status for a stadium
+/**
+ * GET /api/stadiums/:id/gates
+ * Returns active gate statuses and crowd levels for a stadium.
+ */
 app.get('/api/stadiums/:id/gates', (req, res) => {
   const gates = getGateStatus(req.params.id);
   if (!gates) return res.status(404).json({ error: 'Stadium not found' });
   res.json({ gates });
 });
 
-// Section info
+/**
+ * GET /api/stadiums/:id/sections/:section
+ * Returns specific details about a section.
+ */
 app.get('/api/stadiums/:id/sections/:section', (req, res) => {
   const section = getSectionInfo(req.params.id, req.params.section);
   if (!section) return res.status(404).json({ error: 'Section not found' });
   res.json({ section });
 });
 
-// Nearest facilities (restrooms, concessions)
+/**
+ * GET /api/stadiums/:id/sections/:section/nearby
+ * Returns nearest facilities (restrooms, concessions, exits) from a section point.
+ */
 app.get('/api/stadiums/:id/sections/:section/nearby', (req, res) => {
   const stadiumId = req.params.id;
   const sectionId = req.params.section;
@@ -163,14 +230,20 @@ app.get('/api/stadiums/:id/sections/:section/nearby', (req, res) => {
   res.json({ restrooms, concessions, exits });
 });
 
-// Match info
+/**
+ * GET /api/stadiums/:id/match
+ * Returns scheduling and score information for match at a stadium.
+ */
 app.get('/api/stadiums/:id/match', (req, res) => {
   const match = getMatchInfo(req.params.id);
   if (!match) return res.status(404).json({ error: 'No match found' });
   res.json({ match });
 });
 
-// Active alerts
+/**
+ * GET /api/alerts
+ * Returns active operational alerts, optionally running overcrowding check first.
+ */
 app.get('/api/alerts', (req, res) => {
   const stadiumId = req.query.stadium;
   // Run overcrowding check
@@ -178,7 +251,10 @@ app.get('/api/alerts', (req, res) => {
   res.json({ alerts: getActiveAlerts(stadiumId) });
 });
 
-// Acknowledge alert
+/**
+ * POST /api/alerts/:id/acknowledge
+ * Acknowledges a specific alert.
+ */
 app.post('/api/alerts/:id/acknowledge', (req, res) => {
   const ok = acknowledgeAlert(req.params.id);
   res.json({ acknowledged: ok });
@@ -186,6 +262,10 @@ app.post('/api/alerts/:id/acknowledge', (req, res) => {
 
 // ─── Chat Endpoint (Core GenAI) ─────────────────────────
 
+/**
+ * POST /api/chat
+ * Handles real-time queries from fans, including rate-limiting, input-sanitization, caching, and Gemini.
+ */
 app.post('/api/chat', async (req, res) => {
   // Apply Rate Limiting
   if (!limiter.isAllowed(req.ip)) {
@@ -196,8 +276,8 @@ app.post('/api/chat', async (req, res) => {
 
   // Validate input
   const message = sanitize(req.body.message);
-  const stadiumId = sanitize(req.body.stadium_id) || 'metlife';
-  const sectionId = sanitize(req.body.section_id) || '100';
+  const stadiumId = sanitize(req.body.stadium_id) || DEFAULT_STADIUM_ID;
+  const sectionId = sanitize(req.body.section_id) || DEFAULT_SECTION_ID;
 
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
